@@ -1,0 +1,94 @@
+#!groovy
+node('master') {
+    currentBuild.result = "SUCCESS"
+    try {
+        stage('initialize') {
+            echo "initializing..."
+            environment {
+                SONAR_HOME = '/opt/sonarqube-5.6.6'
+                SONAR_SCANNER_HOME = '/opt/sonar-scanner-3.0.3.778-linux'
+                PATH = '${SONAR_SCANNER_HOME}/bin:${SONAR_HOME}/bin:${PATH}'
+                JAVA_HOME = '/usr/local/java/jdk1.8.0_131'
+                CLASSPATH = '.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar'
+                M3_HOME = '/usr/local/java/apache-maven-3.5.0'
+                M3 = '$M3_HOME/bin'
+                PATH = '$JAVA_HOME/bin:$PATH:$M3'
+            }
+            echo "initialized successfully."
+        }
+        stage('checkout') {
+            echo 'checkout...'
+            checkout scm
+        }
+        stage('build') {
+            echo "building..."
+            def mvnHome = tool 'M3'
+            sh "${mvnHome}/bin/mvn clean install -Dmaven.test.skip=true"
+        }
+
+        stage('test') {
+            def currentPath = pwd()
+            currentPath = currentPath + "/account-test";
+            echo "$currentPath"
+            def mvnHome = tool 'M3'
+            sh "cd $currentPath"
+            sh "${mvnHome}/bin/mvn test"
+            publishHTML([
+                    allowMissing         : false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll              : true,
+                    reportDir            : 'account-test/target/surefire-reports/html',
+                    reportFiles          : 'index.html',
+                    reportName           : 'TestReport',
+                    reportTitles         : ''])
+        }
+
+        stage('deploy') {
+            echo "deploying..."
+            def config = readYaml file: 'ci/config.yml'
+            def docker_cfg = config.dev.dockers[0]
+            def host = docker_cfg.ssh_host
+            def port = docker_cfg.ssh_port
+            def tomcat_home = "/usr/local/java/apache-tomcat-8.0.44"
+            def install_home = "/usr/local/account-api/softwares"
+            def currentPath = pwd()
+            currentPath = currentPath + "/account-web/target"
+
+            echo "host:${host}"
+            echo "port:${port}"
+            echo "${currentPath}/account.war"
+
+            sh "ssh -p${port} ${host} \"sh ${tomcat_home}/bin/shutdown.sh; \""
+            sh "ssh -p${port} ${host} \"rm -rf  ${install_home}/account.war; \""
+            sh "scp -P ${port} ${currentPath}/account.war ${host}:${install_home}"
+            sh "ssh -p ${port} ${host} \"rm -rf ${tomcat_home}/logs;mkdir ${tomcat_home}/logs;rm -rf ${tomcat_home}/webapps/ROOT;mkdir ${tomcat_home}/webapps/ROOT; \""
+            sh "ssh -p ${port} ${host} \"unzip ${install_home}/account.war -d ${tomcat_home}/webapps/ROOT  \"";
+            sh "ssh -p ${port} ${host} \"sh ${tomcat_home}/bin/startup.sh;\""
+            /**/
+            echo "deployed successfully."
+
+        }
+    }
+    catch (err) {
+        currentBuild.result = 'FAILURE'
+    }
+    finally {
+        if (currentBuild.result == 'SUCCESS') {
+            emailext(
+                    /*subject: '${DEFAULT_SUBJECT}',
+                    body: '${DEFAULT_CONTENT}',
+                    to: '${DEFAULT_REPLYTO}'*/
+
+            )
+            emailext(to: 'wenqing.dai@quantil.com',
+                    subject: '${DEFAULT_SUBJECT}',
+                    body: '${DEFAULT_CONTENT}',)
+        } else {
+            emailext(
+                    subject: '${DEFAULT_SUBJECT}',
+                    body: '${DEFAULT_CONTENT}',
+                    to: '${DEFAULT_REPLYTO}'
+            )
+        }
+    }
+}

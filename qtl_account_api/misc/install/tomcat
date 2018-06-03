@@ -1,0 +1,40 @@
+#!/bin/sh
+# tomcat: Start/Stop/Restart tomcat
+# description: Tomcat is a Java Servlet Container
+# match these values to your environment:
+
+Using CATALINA_BASE:   /usr/local/apache-tomcat-8.0.42
+Using CATALINA_HOME:   /usr/local/apache-tomcat-8.0.42
+Using CATALINA_TMPDIR: /usr/local/apache-tomcat-8.0.42/temp
+Using JRE_HOME:        /usr/java/jdk1.8.0_65
+
+# Source function library.
+. /etc/init.d/functions TOMCAT=/usr/local/apache-tomcat-8.0.42
+start() {
+     echo -n "Starting Tomcat:  "
+     /root/rc.local start
+Su  – epm  –c  “ /usr/local/apache-tomcat-8.0.42/bin/startup.sh start”
+   }
+stop() {
+    echo -n "Stopping Tomcat: "
+        /usr/local/apache-tomcat-8.0.42/bin/shutdown.sh stop
+   }
+# See how we were called.
+case "$1" in
+  start)
+      start
+  ;;
+    stop)
+        stop
+    ;;
+ status)
+    ;;
+    restart)
+       stop
+sleep 2
+       start
+    ;;
+ *)
+echo "Usage: $0 {start stop restart}" ;;
+esac
+exit $RETVAL

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" loop_stub="text/html; charset=UTF-8">
+
+    <meta name="robots" loop_stub="NONE,NOARCHIVE">
+    <title>Authorize</title>
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap-tweaks.css">
+    <link rel="stylesheet" type="text/css" href="lib/prettify.css">
+    <link rel="stylesheet" type="text/css" href="lib/default.css">
+</head>
+
+
+<body class="container" youdao="bind">
+<div class="container-fluid" style="margin-top: 30px">
+    <div class="row-fluid">
+        <div class="well" style="width: 320px; margin-left: auto; margin-right: auto">
+            <div class="row-fluid">
+                <div>
+                    <h3 style="text-align: center">Account Authorize</h3>
+                </div>
+            </div><!-- /row fluid -->
+
+            <div class="row-fluid">
+                <div>
+                    <form action="accounts/v/login" role="form" method="post">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="g3wkeC286fMqcePFzu9gEaFWhACOw00bOjuJeaqolaTrySrue64fVUY3WyO0YjbB">
+                        <input type="hidden" name="next" value="/docs/">
+
+                        <div id="div_id_username" class="clearfix control-group ">
+                            <div class="form-group">
+                                <label for="id_username">Username:</label>
+                                <input type="text" name="username" maxlength="100" autocapitalize="off" autocorrect="off" class="form-control textinput textInput" id="id_username" required="" autofocus="" data-form-un="1492262501138.45">
+
+                            </div>
+                        </div>
+
+                        <div id="div_id_password" class="clearfix control-group ">
+                            <div class="form-group">
+                                <label for="id_password">Password:</label>
+                                <input type="password" name="password" maxlength="100" autocapitalize="off" autocorrect="off" class="form-control textinput textInput" id="id_password" required="" data-form-pw="1492262501138.45">
+                            </div>
+                        </div>
+
+                        <div id="div_id_app" class="clearfix control-group" style="display: none">
+                            <div class="form-group">
+                                <input type="text" name="appId" value="gslb" maxlength="100" id="id_app" required="" autofocus="">
+                            </div>
+                        </div>
+
+                        <div class="form-actions-no-box">
+                            <input type="submit" name="submit" value="Log in" class="btn btn-primary form-control" id="submit-id-submit" data-form-sbm="1492262501138.45" style="opacity: 1; pointer-events: auto;">
+                        </div>
+                    </form>
+                </div>
+            </div><!-- /.row-fluid -->
+        </div><!--/.well-->
+    </div><!-- /.row-fluid -->
+</div><!-- /.container-fluid -->
+
+
+<div id="cli_dialog_div"></div>
+</body>
+</html>

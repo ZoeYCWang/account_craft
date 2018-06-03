@@ -1,0 +1,92 @@
+#!groovy
+def projectName = ''
+def version = ''
+def workspace = ''
+def config;
+def platForm = ''
+def utils;
+def jenkinsPath='/var/lib/jenkins/workspace'
+def ppNumI=1
+pipeline {
+    agent any
+    stages {
+        stage("Initialize") {
+            steps {
+                echo "Initializing..."
+                script {
+                    workspace = pwd()
+                    config = readYaml file: 'ci/config.yml'
+                    utils = load "${jenkinsPath}/ci/utils.groovy"
+
+                    if (config.language == "java") {
+                        def jdk = tool 'JDK1.8'
+                        env.PATH = "${jdk}/bin:${env.PATH}"
+                    } else if (config.language.contains("node")) {
+                        def node = tool name: "Node.js", type: "jenkins.plugins.nodejs.tools.NodeJSInstallation"
+                        env.PATH = "${node}/bin:${env.PATH}"
+                    }
+                    echo "${env.PATH}"
+
+                    sh "dos2unix ${workspace}/misc/build/build.sh"
+                    sh "dos2unix ${workspace}/misc/deploy/deploy.sh"
+
+                    sh "chmod +x ${workspace}/misc/deploy/deploy.sh"
+                    sh "chmod +x ${workspace}/misc/build/build.sh"
+
+                }
+            }
+        }
+        stage("Build") {
+            steps {
+                echo "build(compile, code analysis, unit test, pkg)"
+                script {
+                    def branchName = env.BRANCH_NAME
+                    echo "${branchName}"
+                    platForm = utils.getPlatform(branchName);
+                    projectName = config.project.name
+
+                    def pp = "${jenkinsPath}/${projectName}"
+                    sh "if test ! -f  ${pp}; then  touch  ${pp} ; fi "
+                    def ppNum = readFile "${pp}"
+                    if (ppNum != "")
+                        ppNumI = ppNum.toInteger() + 1;
+                    sh " echo '${ppNumI}' > ${pp}"
+
+                    version = readFile "${workspace}/VERSION"
+                    utils.build(config,projectName,platForm,version.trim())
+                    utils.packTo(config, projectName, platForm, version.trim(), ppNumI)
+                    utils.publishHTML(config)
+                }
+            }
+        }
+        stage("Deploy") {
+            steps {
+                script {
+                    if(platForm!="prod")
+                        utils.deploy(config, projectName, platForm, version.trim(), ppNumI)
+                }
+                echo "deployed successfully."
+            }
+        }
+
+        stage("Test") {
+            steps {
+                //echo "Test..."
+                script {
+                    def mvnHome = tool 'M3'
+                    utils.test(config, projectName, platForm, version.trim(), ppNumI,mvnHome)
+                }
+            }
+        }
+    }
+    post {
+        failure {
+            emailext(to: "${config.mail.recipients}",
+                    subject: '${DEFAULT_SUBJECT}',
+                    body: '${DEFAULT_CONTENT}',)
+        }
+        /*success {
+             // if is release will to tag the github
+        }*/
+    }
+}

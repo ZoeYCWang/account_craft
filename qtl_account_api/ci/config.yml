@@ -1,0 +1,24 @@
+project:
+    name: account-api
+language: java
+deploy: true
+deploy:
+    - name: feature
+      ssh_host: 180.101.103.116
+      ssh_port: 57891
+    - name: develop
+      ssh_host: 220.243.197.88
+      ssh_port: 57891
+    - name: beta
+      ssh_host: 220.243.197.89
+      ssh_port: 57891
+mail:
+    recipients: wenqing.dai@quantil.com
+###############################################
+softrepo:
+    url: http://softrepo.qtlcdn.com/account-api/
+    dir: /opt/softrepo/account-api/
+    ssh_host: root@203.130.48.199
+    ssh_port: 57891
+    setting: 203.130.48.199
+

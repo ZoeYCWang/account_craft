@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context" xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:component-scan base-package="com.zoe.snow"/>
+    <bean id="dataSources" class="com.zoe.snow.dao.DataSources">
+        <property name="dataSourceBeanMap">
+            <map>
+                <!--默认数据源，如果有多个数据源可以继续追加 entry-->
+                <entry key="default">
+                    <bean class="com.zoe.snow.dao.DataSourceBean">
+                        <!--数据库驱动类型-->
+                        <property name="driver" value="mysql"/>
+                        <!--数据库名-->
+                        <property name="schema" value="account"/>
+                        <!--集群的名称，可为空-->
+                        <!--是否开启验证器-->
+                        <property name="toValidate" value="true"/>
+                        <!--可读可写主机-->
+                        <property name="writeAbleHost">
+                            <bean class="com.zoe.snow.dao.DataSourceHost">
+                                <!--主机IP地址，可以输入对称加密后的地址 220.243.197.87-->
+                                <property name="ip" value="localhost"/>
+                                <!--主机用户名，可以入对称加密后的用户名 -->
+                                <property name="user" value="quantil"/>
+                                <!--主机用户密码，可以输入 对称加密后的密码-->
+                                <property name="password" value="quantil@123456"/>
+                                <!--端口号，默认可以不填写-->
+                                <property name="port" value="3306"/>
+                                <!--节点控制开关，默认为开的-->
+                                <property name="hostSwitch" value="true"/>
+                            </bean>
+                        </property>
+                        <!--只读主机-->
+                        <!--<property name="readOnlyHost">
+                        </property>-->
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+    <context:component-scan base-package="com.quantil"/>
+    <bean id="hibernateConfigBean" class="com.zoe.snow.dao.hibernate.HibernateConfigBean">
+        <property name="packageToScan" value="com.quantil"/>
+        <property name="showSql" value="false"/>
+        <property name="useSecondLevel" value="false"/>
+    </bean>
+    <!-- API 接口跨域配置 -->
+    <mvc:cors>
+        <mvc:mapping path="/api/**"
+                     allowed-origins="*"
+                     allowed-methods="POST, GET, OPTIONS, DELETE, PUT"
+                     allowed-headers="Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+                     allow-credentials="true"/>
+    </mvc:cors>
+    <context:property-placeholder location="classpath*:*.conf.properties"/>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.zoe.snow.context.validator.ValidatorInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

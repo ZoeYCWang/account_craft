@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context" xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:component-scan base-package="com.zoe.snow"/>
+    <bean id="dataSources" class="com.zoe.snow.dao.DataSources">
+        <property name="dataSourceBeanMap">
+            <map>
+                <entry key="default">
+                    <bean class="com.zoe.snow.dao.DataSourceBean">
+                        <property name="driver" value="mysql"/>
+                        <property name="schema" value="account"/>
+                        <property name="toValidate" value="true"/>
+                        <property name="writeAbleHost">
+                            <bean class="com.zoe.snow.dao.DataSourceHost">
+                                <property name="ip" value="120.27.21.73"/>
+                                <property name="user" value="root"/>
+                                <property name="password" value="root"/>
+                                <property name="port" value="3306"/>
+                                <property name="hostSwitch" value="true"/>
+                            </bean>
+                        </property>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+    <bean class="springfox.documentation.swagger2.configuration.Swagger2DocumentationConfiguration" id="swagger2Config"/>
+    <context:component-scan base-package="com.quantil"/>
+    <bean id="hibernateConfigBean" class="com.zoe.snow.dao.hibernate.HibernateConfigBean">
+        <property name="packageToScan" value="com.quantil"/>
+        <property name="showSql" value="false"/>
+        <property name="useSecondLevel" value="false"/>
+    </bean>
+    <bean class="com.zoe.snow.auth.AuthBean">
+        <property name="authSwitch" value="true"/>
+    </bean>
+    <mvc:cors>
+        <mvc:mapping path="/api/**"
+                     allowed-origins="*"
+                     allowed-methods="POST, GET, OPTIONS, DELETE, PUT"
+                     allowed-headers="Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+                     allow-credentials="true"/>
+    </mvc:cors>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.zoe.snow.context.validator.ValidatorInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

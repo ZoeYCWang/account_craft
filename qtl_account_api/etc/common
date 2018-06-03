@@ -1,0 +1,11 @@
+MYSQL_U_ROOT=root
+MYSQL_P_ROOT=Quantil@456123
+MYSQL_U_ACCOUNT=quantil
+MYSQL_P_ACCOUNT=quantil@123456
+MYSQL_U_REPL=repl_user
+MYSQL_P_REPL=Quantil@123456
+
+REDIS_USERNAME=quantil
+REDIS_PASSWORD=quantil@123456
+
+REDIS_STATUS_FILE=/usr/local/account-api/dist/etc/status

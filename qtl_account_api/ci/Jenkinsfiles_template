@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    stages {
+        stage("Initialize") {
+            steps {
+                echo "Initializing..."
+            }
+        }
+        stage("Checkout") {
+            steps {
+                echo "Checkout source code..."
+                checkout scm
+            }
+        }
+        stage("Build") {
+            steps {
+                echo "Building..."
+            }
+        }
+        stage("Test") {
+            steps {
+                echo "Test..."
+                script {
+
+                }
+
+            }
+        }
+        stage("Deploy") {
+            steps {
+                echo "Deploying..."
+                script {
+
+                }
+            }
+        }
+    }
+    post {
+
+        failure {
+            emailext(to: 'wenqing.dai@quantil.com',
+                    subject: '${DEFAULT_SUBJECT}',
+                    body: '${DEFAULT_CONTENT}',)
+        }
+        success {
+
+        }
+    }
+}
